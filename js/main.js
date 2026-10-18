@@ -7,7 +7,7 @@ const $ = (s) => document.querySelector(s);
 G.showGame = function () { $('#title').classList.add('hidden'); $('#creator').classList.add('hidden'); $('#game').classList.remove('hidden'); };
 G.showTitle = function () {
   $('#game').classList.add('hidden'); $('#creator').classList.add('hidden'); $('#title').classList.remove('hidden');
-  $('#btn-continue').disabled = !localStorage.getItem('wetinburg_days_slot_auto');
+  $('#btn-continue').disabled = !G.store.get('wetinburg_days_slot_auto');
 };
 
 /* ---------- world creation (tabs: Your Character / Named NPCs / World) ---------- */
@@ -111,7 +111,7 @@ G.boot = function () {
   $('#btn-new').onclick = () => { ccTab = 'character'; G.openCreator(); };
   $('#btn-continue').onclick = () => { try { G.loadFrom('auto'); } catch (e) { console.error(e); alert('Could not load autosave: ' + e.message); } };
   $('#btn-load').onclick = () => G.menus.save();
-  $('#btn-theme-title').onclick = () => { const t = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; document.documentElement.dataset.theme = t; try { localStorage.setItem('wd_theme', t); } catch (e) { /* */ } };
+  $('#btn-theme-title').onclick = () => { const t = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; document.documentElement.dataset.theme = t; G.store.set('wd_theme', t); };
   document.querySelectorAll('[data-menu]').forEach(b => b.onclick = () => G.menu(b.dataset.menu));
   $('#btn-title').onclick = () => { if (confirm('Return to the title screen? (Your game is autosaved.)')) { if (G.S) G.autosave(); G.showTitle(); } };
   $('#btn-themetoggle').onclick = () => { if (!G.S) return; G.S.settings.theme = G.S.settings.theme === 'light' ? 'dark' : 'light'; G.applySettings(); };

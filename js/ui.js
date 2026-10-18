@@ -438,11 +438,24 @@ G.menus.settings = function (tab) {
     G.bindNpcCfg(b, S.npcCfg, () => G.menus.settings('npcs'));
   });
 };
+/* ---------- safe storage: localStorage can be missing or throw (Safari private mode,
+   cookies/site data blocked, sandboxed iframes). Fall back to an in-memory store so the game still runs. ---------- */
+G.store = (function () {
+  const mem = {};
+  let ls = null;
+  try { ls = window.localStorage; const t = '__wd_test__'; ls.setItem(t, '1'); ls.removeItem(t); } catch (e) { ls = null; }
+  G.storageOk = !!ls;
+  return {
+    get(k) { if (ls) { try { return ls.getItem(k); } catch (e) { /* fall through */ } } return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; },
+    set(k, v) { v = String(v); if (ls) { try { ls.setItem(k, v); return true; } catch (e) { /* quota/blocked: keep in memory */ } } mem[k] = v; return !ls; },
+    remove(k) { if (ls) { try { ls.removeItem(k); } catch (e) { /* */ } } delete mem[k]; },
+  };
+})();
 G.applySettings = function () {
-  const s = (G.S && G.S.settings) || { theme: localStorage.getItem('wd_theme') || 'dark', fontSize: 16 };
+  const s = (G.S && G.S.settings) || { theme: G.store.get('wd_theme') || 'dark', fontSize: 16 };
   document.documentElement.dataset.theme = s.theme;
   document.documentElement.style.setProperty('--fs', s.fontSize + 'px');
-  try { localStorage.setItem('wd_theme', s.theme); } catch (e) { /* ignore */ }
+  G.store.set('wd_theme', s.theme);
 };
 
 /* ---------- save / load ---------- */
@@ -450,8 +463,8 @@ const KEY = 'wetinburg_days_slot_';
 G.saveTo = function (slot) {
   try {
     const data = JSON.stringify(G.S);
-    localStorage.setItem(KEY + slot, data);
-    localStorage.setItem(KEY + slot + '_meta', JSON.stringify({ name: G.S.player.name, date: G.shortDate(G.day()), time: G.timeStr(), loc: D.LOCATIONS[G.S.loc].name, saved: new Date().toLocaleString() }));
+    if (!G.store.set(KEY + slot, data)) throw new Error('storage unavailable or full');
+    G.store.set(KEY + slot + '_meta', JSON.stringify({ name: G.S.player.name, date: G.shortDate(G.day()), time: G.timeStr(), loc: D.LOCATIONS[G.S.loc].name, saved: new Date().toLocaleString() }));
     return true;
   } catch (e) { console.warn('save failed', e); return false; }
 };
@@ -474,9 +487,9 @@ G.loadState = function (S) {
   G.S = G.migrate(S); G.S.started = true; G.applySettings(); G.showGame();
   G.note('Game loaded', 'info'); G.goto(G.here);
 };
-G.loadFrom = function (slot) { const d = localStorage.getItem(KEY + slot); if (!d) return false; G.loadState(JSON.parse(d)); return true; };
-G.slotMeta = (slot) => { try { return JSON.parse(localStorage.getItem(KEY + slot + '_meta')); } catch (e) { return null; } };
-G.anySave = () => ['auto', 1, 2, 3, 4, 5].some(s => localStorage.getItem(KEY + s));
+G.loadFrom = function (slot) { const d = G.store.get(KEY + slot); if (!d) return false; G.loadState(JSON.parse(d)); return true; };
+G.slotMeta = (slot) => { try { return JSON.parse(G.store.get(KEY + slot + '_meta')); } catch (e) { return null; } };
+G.anySave = () => ['auto', 1, 2, 3, 4, 5].some(s => G.store.get(KEY + s));
 G.menus.save = function (msg) {
   const inGame = G.S && G.S.started;
   let h = msg ? `<p class="okmsg">${msg}</p>` : '';
@@ -496,7 +509,7 @@ G.menus.save = function (msg) {
       const s = btn.dataset.s, a = btn.dataset.a;
       if (a === 'save') { G.menus.save(G.saveTo(s) ? `Saved to slot ${s}.` : 'Saving failed (storage full or disabled).'); }
       if (a === 'load') { G.closeModal(); G.loadFrom(s); }
-      if (a === 'del') { localStorage.removeItem(KEY + s); localStorage.removeItem(KEY + s + '_meta'); G.menus.save('Deleted.'); }
+      if (a === 'del') { G.store.remove(KEY + s); G.store.remove(KEY + s + '_meta'); G.menus.save('Deleted.'); }
     });
     const ef = b.querySelector('#exp-file'); if (ef) ef.onclick = () => {
       const blob = new Blob([JSON.stringify(G.S, null, 1)], { type: 'application/json' });
