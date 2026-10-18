@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wetinburg Days — a slice-of-life sandbox</title>
+<meta name="description" content="A wholesome text-based slice-of-life sandbox set in the seaside town of Wetinburg.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌷</text></svg>">
+</head>
+<body>
+<!-- Title screen -->
+<section id="title" class="screen">
+  <div class="title-card">
+    <div class="title-art">🌊 ⛲ 🏫 🌲 🐄</div>
+    <h1>Wetinburg Days</h1>
+    <p class="tagline">A slice-of-life sandbox in the little seaside town of Wetinburg.<br>School, friends, farms, part-time jobs, festivals — and a little bit of magic.</p>
+    <div class="title-btns">
+      <button id="btn-new">New Game</button>
+      <button id="btn-continue">Continue</button>
+      <button id="btn-load" class="ghost">Load / Import</button>
+      <button id="btn-theme-title" class="ghost">Toggle theme</button>
+    </div>
+    <p class="small dim">Wholesome content for all ages · Saves stay in your browser · No internet required</p>
+  </div>
+</section>
+
+<!-- Character creation -->
+<section id="creator" class="screen hidden">
+  <div class="creator-card">
+    <h2>World Creation</h2>
+    <div id="creator-tabs" class="tabs cc-tabs" role="tablist"></div>
+    <div class="creator-body">
+      <div id="creator-side" class="creator-doll"><div id="creator-doll"></div><div id="creator-sum" class="small"></div></div>
+      <form id="creator-form" onsubmit="return false"></form>
+    </div>
+    <div id="creator-actions" class="cc-actions"></div>
+  </div>
+</section>
+
+<!-- Game -->
+<section id="game" class="hidden">
+  <header id="topbar">
+    <div class="brand">🌷 Wetinburg Days</div>
+    <nav>
+      <button data-menu="stats" title="Characteristics (C)">📊 <span>Characteristics</span></button>
+      <button data-menu="inventory" title="Inventory (I)">🎒 <span>Inventory</span></button>
+      <button data-menu="wardrobe" title="Wardrobe (W)">👕 <span>Wardrobe</span></button>
+      <button data-menu="relationships" title="Relationships (R)">💞 <span>People</span></button>
+      <button data-menu="map" title="Map (M)">🗺️ <span>Map</span></button>
+      <button data-menu="journal" title="Journal (J)">📔 <span>Journal</span></button>
+      <button data-menu="traits" title="Traits (T)">✨ <span>Traits</span></button>
+      <button data-menu="settings" title="Settings">⚙️ <span>Settings</span></button>
+      <button data-menu="save" title="Save / Load (S)">💾 <span>Save</span></button>
+      <button id="btn-themetoggle" title="Toggle dark/light">🌓</button>
+      <button id="btn-title" title="Title screen">⏏</button>
+    </nav>
+  </header>
+  <div id="layout">
+    <aside id="sidebar"></aside>
+    <main id="main">
+      <article id="passage"></article>
+      <div id="choices"></div>
+    </main>
+  </div>
+</section>
+
+<div id="modal"><div class="modal-card"><div class="modal-head"><h2 id="modal-title"></h2><button id="modal-close" aria-label="Close">✕</button></div><div id="modal-body"></div></div></div>
+<div id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/systems.js"></script>
+<script src="js/npcs.js"></script>
+<script src="js/story.js"></script>
+<script src="js/events.js"></script>
+<script src="js/locations.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
